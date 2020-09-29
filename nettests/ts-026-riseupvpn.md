@@ -9,7 +9,7 @@ RiseupVPN
 # Test preconditions
 
 * An internet connection with functional DNS
-* When testing the connection to a riseupvpn gateway, we assume that OpenVPN is already installed
+* When testing the connection to a riseupvpn gateway, we assume that OpenVPN and Shapeshifter-Dispatcher is already installed
 
 # Expected impact
 
@@ -22,6 +22,7 @@ None. In a next iteration you can specify a provider, the default is riseup.net
 
 ## Semantics
 
+cyberta: I think we don't need that for now. Testers can run the whole experiment only without specifying any parameters
 DO WE WANT THIS, DO WE WANT THIS NOW, LIKE THIS? FORMAT REQUIRES IMPROVEMENT
 * A provider can be specified with their domain name: https://calyx.net
 * A specific gateway and transport can be tested with a url: ovpn://192.168.1.1:1194
@@ -44,7 +45,9 @@ The locations are:
 * https://api.black.riseup.net:9001/json contains the the client's IP address, geolocation and gives a list of gateways that's the closest and/or under less stress (from other users). This can be different and change.
 * https://api.black.riseup.net/3/cert for fetching an OpenVPN client certificate
 
-We consider RiseupVPN API to be blocked when we can't make TCP connections. `RiseupVPNApiWebFailure` and `RiseupVPNApiWebStatus` are used in the reports. FIXME: WHAT ARE THEIR VALUES? CAN WE WRITE riseupvpn_api_status, leave out Web, let the CameLs free?
+We consider RiseupVPN API to be blocked when we can't make TCP connections. `RiseupVPNApiWebFailure` and `RiseupVPNApiWebStatus` are used in the reports. FIXME: WHAT ARE THEIR VALUES? -> see df-007-errors.md, grep for PE, which indicates the error is emitted by probe-engine, another failure value can be 'invalid_ca' if the downloaded ca cannot be imported to the cert pool of root certificates
+
+CAN WE WRITE riseupvpn_api_status, leave out Web, let the CameLs free? -> yes let's remove the web, but let's keep the CamelCase for Go code. It seems to be quite common in the golang world.
 
 ```json
 {
@@ -52,6 +55,8 @@ We consider RiseupVPN API to be blocked when we can't make TCP connections. `Ris
     "riseupvpn_api_status": "blocked"
 }
 ```
+
+
 
 If all parts of the API are functional and reachable then we write:
 
@@ -67,6 +72,7 @@ If all parts of the API are functional and reachable then we write:
 When OpenVPN is installed, we can verify if a connection to these gateways is possible. If they can't be reached or we don't get the expected results we can presume them to be blocked. However, without OpenVPN installed, we don't run this test. We test by using the client certificate fetched in the API check.
 
 If any one of the OpenVPN gateways are blocked then we presume them to blocked and write in the report: FIXME: DO WE WRITE WHICH GATEWAYS ARE BLOCKED? HOW?
+-> maybe we add a string array 'blocked_ips' to the json
 
 ```json
 {
@@ -90,6 +96,7 @@ If for whatever reason 1 or more of their gatewayservers is overloaded, suffers 
 
 ## Parent data format
 FIXME: I'M MISSING SOME STUFF :(
+-> not sure either if we should keep this section empty or add stuff to the list. Let's ask.
 
 * `df-001-httpt`
 * `df-002-dnst` (since 2020-01-09 in ooni/probe-engine)
